@@ -1,3 +1,4 @@
+mocha.setup({globals: ['hasCert']});
 describe('Correctly labels poker hands', function() {
   it("High card", function() {
     expect(poker.labelHand("9H 8C 4H 3S 2D")).to.equal("9 High");
