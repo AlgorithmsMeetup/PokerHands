@@ -1,4 +1,3 @@
-mocha.setup({globals: ['hasCert']});
 describe('Correctly labels poker hands', function() {
   it("High card", function() {
     expect(poker.labelHand("9H 8C 4H 3S 2D")).to.equal("9 High");
@@ -15,7 +14,7 @@ describe('Correctly labels poker hands', function() {
   });
 
   it("Three of a kind", function() {
-    expect(poker.labelHand("8H 8C 8S KH JS")).to.equal("Three of kind of 8");
+    expect(poker.labelHand("8H 8C 8S KH JS")).to.equal("Three of a kind of 8");
   });
 
   it("Straight", function() {

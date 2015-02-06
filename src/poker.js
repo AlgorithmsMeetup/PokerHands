@@ -3,68 +3,95 @@ var poker = {
   // See the specs for the required formats.
   labelHand: function(hand) {
       var isRoyalFlush = function(hand){
-        // if( isStraightFlush(hand) && isHighCard(hand)==='A High' ){
-        //   console.log('Royal flush');
-        //   return 'Royal flush'
-        // }
-      };
-      var isStraightFlush = function(hand){
-        // console.log('isStraightFlush(hand)',isStraightFlush(hand));
-        // if( isFlush(hand) && isStraight(hand) ){
-        //   return isStraight(hand).replace('Straight', 'Straight flush');
-        // }
-        return false;
-      };
-      var isFourOfAKind = function(hand){
-        var rank1 = hand[0];
-        var rank2 = hand[3];
-// Four of a kind of 4
-        return false;
-      };
-      var isFullHouse = function(hand){
-// Full house of 3
-        return false;
-      };
-      var isFlush = function(hand){
-        var suit = hand[1];
-        if( hand[4]===suit && hand[7]===suit && hand[10]===suit && hand[13]===suit ){
-          return 'Flush with high card '+isHighCard(hand).replace(' High','');
+        var sortedHand = sortHandLowToHigh(hand);
+        if( isStraightFlush(hand) && sortedHand[0].rank==='T' ){
+          // Special case where A is 1.
+          return 'Royal flush'
         }
-// Flush with high card K
       };
+
+      var isStraightFlush = function(hand){
+        if( isFlush(hand) && isStraight(hand) ){
+          return isStraight(hand).replace('Straight', 'Straight flush');
+        }
+        return false;
+      };
+
+      var isFourOfAKind = function(hand){
+        var counts = countsOfRanks(hand)
+        if(counts[4].length){
+          return 'Four of a kind of '+counts[4][0];
+        }
+        return false;
+      };
+
+      var isFullHouse = function(hand){
+        var counts = countsOfRanks(hand)
+        if(counts[3].length && counts[2].length){
+          return 'Full house of '+counts[3][0];
+        }
+        return false;
+        return false;
+      };
+
+      var isFlush = function(hand){
+        console.log('- reduce happens each time :(');
+        var sortedHand = sortHandLowToHigh(hand);
+        var flushSuit = sortedHand.reduce(function(suit, card){
+          return suit = card.suit === suit ? suit : false;
+        }, sortedHand[0].suit);
+        if(flushSuit){
+          return 'Flush with high card '+sortedHand[4].rank;
+        }
+      };
+
       var isStraight = function(hand){
         var sortedHand = sortHandLowToHigh(hand);
         var low = sortedHand[0];
+        var nextHighest = sortedHand[3];
         var high = sortedHand[4];
-        if(high.rankNum-low.rankNum === 4){
+        if(high.rankNum-low.rankNum===4){
           return 'Straight up to '+high.rank;
-        } else if(high.rank==='A' && low.rank==='2' && sortedHand[3].rank==='5'){
+        } else if(high.rank==='A' && low.rank==='2' && nextHighest.rank==='5'){
+          // Special case where A is 1.
           return 'Straight up to 5';
         }
-// Straight up to 9
       };
+
       var isThreeOfAKind = function(hand){
-// Three of kind of 8
+        var counts = countsOfRanks(hand)
+        if(counts[3].length){
+          return 'Three of a kind of '+counts[3][0];
+        }
         return false;
       };
+
       var isTwoPair = function(hand){
-// Two pair of A and 3
+        var counts = countsOfRanks(hand)
+        if(counts[2].length===2){
+          return 'Two pair of '+counts[2][1]+' and '+counts[2][0];
+        }
         return false;
       };
+
       var isPair = function(hand){
-// Pair of 2
-        return false;
+        var pair = countsOfRanks(hand)[2];
+        if(pair.length){
+          return 'Pair of '+pair;
+        }
       };
+
       var isHighCard = function(hand){
         var highCard = sortHandLowToHigh(hand)[4];
-        console.log(highCard.rank+' High');
         return highCard.rank+' High'
       };
-      var sortHandLowToHigh = function(hand){
-        var sortedHand = hand
+
+      var splitHand = function(hand){
+        return hand
           .split(' ')
           .map(function(card){
             var actualRank = card[0]
+            var suit = card[1];
             var numericRank = actualRank;
             switch(numericRank){
               case 'T': numericRank=10; break;
@@ -73,16 +100,39 @@ var poker = {
               case 'K': numericRank=13; break;
               case 'A': numericRank=14; break;
             }
-            return {rankNum: numericRank, rank: actualRank};
-          })
+            return {rankNum: numericRank, rank: actualRank, suit: suit};
+          });
+      };
+
+      var sortHandLowToHigh = function(hand){
+        return splitHand(hand)
           .sort(function(a,b){
             return a.rankNum > b.rankNum;
           });
-        console.log(sortedHand);
-        return sortedHand;
+      };
+      var countsOfRanks = function(hand){
+        var results = {1:[], 2:[], 3:[], 4:[]};
+        var sortedHand = sortHandLowToHigh(hand);
+        var currentRank = sortedHand[0].rank;
+        var currentRankCount = 0;
+        for(var i=0; i<5; i++){
+          if(sortedHand[i].rank === currentRank){
+            currentRankCount++;
+          } else {
+            results[currentRankCount].push(currentRank);
+            currentRank = sortedHand[i].rank;
+            currentRankCount = 1;
+          }
+        }
+        results[currentRankCount].push(currentRank);
+        // >[2,2,3,4,5]
+        // <{1:[3,4,5], 2:[2]}
+        // >[K,K,Q,8,3]
+        // <{1:[3,8,Q], 2:[K]}
+        return results;
       };
 
-      result = isHighCard(hand);
+      var result = isHighCard(hand);
       result = isPair(hand) || result;
       result = isTwoPair(hand) || result;
       result = isThreeOfAKind(hand) || result;
@@ -93,6 +143,32 @@ var poker = {
       result = isStraightFlush(hand) || result;
       result = isRoyalFlush(hand) || result;
       return result;
+
+      /*// Smarter
+      var pair = isPair(hand);
+      //pair flush is possible.
+      if(pair){
+        var twoPair = isTwoPair(hand);
+        if(twoPair){
+          return isFullHouse(hand) || isFourOfAKind(hand) || twoPair;
+        } else {
+          return pair;
+        }
+      } else {
+        var flush = isFlush(hand);
+        var straight = isStraight(hand);
+        if(flush || straight){
+          var straightFlush = isStraightFlush(hand);
+          if(straightFlush){
+            return isRoyalFlush(hand) || straightFlush;
+          } else {
+            return flush || straight;
+          }
+        } else {
+          return isHighCard(hand);
+        }
+      }
+      */
   },
 
   // Takes an array of hands and returns the index of the winning hand.
