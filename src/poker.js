@@ -35,8 +35,8 @@ var poker = {
       };
 
       var isFlush = function(hand){
-        console.log('- reduce happens each time :(');
         var sortedHand = sortHandLowToHigh(hand);
+        // reduce happens each time :(
         var flushSuit = sortedHand.reduce(function(suit, card){
           return suit = card.suit === suit ? suit : false;
         }, sortedHand[0].suit);
@@ -68,7 +68,7 @@ var poker = {
 
       var isTwoPair = function(hand){
         var counts = countsOfRanks(hand)
-        if(counts[2].length===2){
+        if(counts[2].length===2 || counts[4].length){
           return 'Two pair of '+counts[2][1]+' and '+counts[2][0];
         }
         return false;
@@ -132,43 +132,38 @@ var poker = {
         return results;
       };
 
-      var result = isHighCard(hand);
-      result = isPair(hand) || result;
-      result = isTwoPair(hand) || result;
-      result = isThreeOfAKind(hand) || result;
-      result = isStraight(hand) || result;
-      result = isFlush(hand) || result;
-      result = isFullHouse(hand) || result;
-      result = isFourOfAKind(hand) || result;
-      result = isStraightFlush(hand) || result;
-      result = isRoyalFlush(hand) || result;
-      return result;
-
-      /*// Smarter
-      var pair = isPair(hand);
-      //pair flush is possible.
-      if(pair){
-        var twoPair = isTwoPair(hand);
-        if(twoPair){
-          return isFullHouse(hand) || isFourOfAKind(hand) || twoPair;
+      // Return highest hand possible.
+      if( isFourOfAKind(hand) ){
+        return isFourOfAKind(hand);
+      }
+      else if( isThreeOfAKind(hand) ){
+        if( isFullHouse(hand) ){
+          return isFullHouse(hand);
         } else {
-          return pair;
-        }
-      } else {
-        var flush = isFlush(hand);
-        var straight = isStraight(hand);
-        if(flush || straight){
-          var straightFlush = isStraightFlush(hand);
-          if(straightFlush){
-            return isRoyalFlush(hand) || straightFlush;
-          } else {
-            return flush || straight;
-          }
-        } else {
-          return isHighCard(hand);
+          return isThreeOfAKind(hand);
         }
       }
-      */
+      else if( isStraightFlush(hand) ){
+        if( isRoyalFlush(hand) ){
+          return isRoyalFlush(hand);
+        } else {
+          return isStraightFlush(hand)
+        }
+      } else if( isFlush(hand) ){
+        return isFlush(hand);
+      }
+      else if( isStraight(hand) ){
+        return isStraight(hand);
+      }
+      else if( isPair(hand) ){
+        if( isTwoPair(hand) ){
+          return isTwoPair(hand);
+        } else {
+          return isPair(hand);
+        }
+      } else {
+        return isHighCard(hand);
+      }
   },
 
   // Takes an array of hands and returns the index of the winning hand.
