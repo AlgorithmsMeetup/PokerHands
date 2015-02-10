@@ -6,7 +6,6 @@ Categorize and compare 5-card poker hands.
 Your task for today is to classify poker hands!  You have two functions to complete:
 
   - labelHand, which gives the name of a single hand.
-  - findWinner, which determines which of several hands is best.
 
 ##Info:
 Hands are 14-character strings that look like "8H TC KS 2C AD", where
