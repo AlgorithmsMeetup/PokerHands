@@ -90,16 +90,16 @@ var poker = {
         return hand
           .split(' ')
           .map(function(card){
-            var actualRank = card[0]
+            var actualRank = card[0];
             var suit = card[1];
-            var numericRank = actualRank;
-            switch(numericRank){
-              case 'T': numericRank=10; break;
-              case 'J': numericRank=11; break;
-              case 'Q': numericRank=12; break;
-              case 'K': numericRank=13; break;
-              case 'A': numericRank=14; break;
-            }
+            var numericRanks = {
+              "T": 10,
+              "J": 11,
+              "Q": 12,
+              "K": 13,
+              "A": 14
+            };
+            var numericRank = numericRanks[actualRank] || actualRank;
             return {rankNum: numericRank, rank: actualRank, suit: suit};
           });
       };
