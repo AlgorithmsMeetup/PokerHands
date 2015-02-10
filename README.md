@@ -1,6 +1,7 @@
 # PokerHands
 Categorize and compare 5-card poker hands.
 
+![card gif](http://animationsa2z.com/attachments/Image/cards/cards2.gif)
 ##Goal:
 Your task for today is to classify poker hands!  You have two functions to complete:
 
